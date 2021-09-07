@@ -45,6 +45,11 @@ namespace MasculinizedLeveledLists
                 string? formattedName = null;
                 LeveledNpc? lvln = lvlngetter.DeepCopy();
 
+                // Make sure not to replace any lists that might be used for quests.
+                if (lvlngetter.EditorID is not null && lvlngetter.EditorID.Contains("VoiceType"))
+                    continue;
+
+                // Try to replace the lists on the manual override lists.
                 if ( lvlngetter.EditorID is not null && configOptions.Value.ManualOverride is not null && configOptions.Value.ManualOverride.TryGetValue(lvlngetter.EditorID, out string? replacementLvln))
                 {
                     lvln.Entries = state.LoadOrder.PriorityOrder.LeveledNpc().WinningOverrides().Where(x => x.EditorID == replacementLvln).First().DeepCopy().Entries;
