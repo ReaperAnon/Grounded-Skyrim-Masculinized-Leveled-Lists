@@ -5,6 +5,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
 using System.Threading.Tasks;
+using Mutagen.Bethesda.Plugins;
 
 namespace MasculinizedLeveledLists
 {
@@ -44,54 +45,63 @@ namespace MasculinizedLeveledLists
                 string? formattedName = null;
                 LeveledNpc? lvln = lvlngetter.DeepCopy();
 
-                if(lvln.EditorID is not null)
+                if ( lvlngetter.EditorID is not null && configOptions.Value.ManualOverride is not null && configOptions.Value.ManualOverride.TryGetValue(lvlngetter.EditorID, out string? replacementLvln))
                 {
-                    // Skip entries based on settings.
-                    string? editorID = lvln.EditorID.ToLower();
-                    if (configOptions.Value.AllowMages && lvln.EditorID is not null && (editorID.Contains("mage") || editorID.Contains("magic") || editorID.Contains("warlock") || editorID.Contains("witch"))) continue;
-                    if (configOptions.Value.AllowDraugr && lvln.EditorID is not null && editorID.Contains("draugr")) continue;
-                    if (configOptions.Value.AllowFalmer && lvln.EditorID is not null && editorID.Contains("falmer")) continue;
-                    if (configOptions.Value.AllowForsworn && lvln.EditorID is not null && editorID.Contains("forsworn")) continue;
-                    if (configOptions.Value.AllowVampires && lvln.EditorID is not null && editorID.Contains("vampire")) continue;
+                    lvln.Entries = state.LoadOrder.PriorityOrder.LeveledNpc().WinningOverrides().Where(x => x.EditorID == replacementLvln).First().DeepCopy().Entries;
+                    Console.WriteLine("Leveled list " + lvln.EditorID + " was manually overridden by " + replacementLvln + ".");
+                    wasModified = true;
                 }
-
-                // Check for similar leveled lists.
-                if (lvln.EditorID is not null)
+                else
                 {
-                    // Check leveled lists ending with "F" for an alternative.
-                    if (lvln.EditorID.EndsWith("F"))
+                    if (lvln.EditorID is not null)
                     {
-                        formattedName = lvln.EditorID.Substring(0, lvln.EditorID.Length - 1) + "M";
-                        wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
+                        // Skip entries based on settings.
+                        string? editorID = lvln.EditorID.ToLower();
+                        if (configOptions.Value.AllowMages && lvln.EditorID is not null && (editorID.Contains("mage") || editorID.Contains("magic") || editorID.Contains("warlock") || editorID.Contains("witch"))) continue;
+                        if (configOptions.Value.AllowDraugr && lvln.EditorID is not null && editorID.Contains("draugr")) continue;
+                        if (configOptions.Value.AllowFalmer && lvln.EditorID is not null && editorID.Contains("falmer")) continue;
+                        if (configOptions.Value.AllowForsworn && lvln.EditorID is not null && editorID.Contains("forsworn")) continue;
+                        if (configOptions.Value.AllowVampires && lvln.EditorID is not null && editorID.Contains("vampire")) continue;
                     }
-                    // Check leveled lists ending with "Female" for an alternative.
-                    else if (lvln.EditorID.EndsWith("Female"))
-                    {
-                        formattedName = lvln.EditorID.Replace("Female", "");
-                        wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
 
-                        if (!wasModified)
+                    // Check for similar leveled lists.
+                    if (lvln.EditorID is not null)
+                    {
+                        // Check leveled lists ending with "F" for an alternative.
+                        if (lvln.EditorID.EndsWith("F"))
+                        {
+                            formattedName = lvln.EditorID.Substring(0, lvln.EditorID.Length - 1) + "M";
+                            wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
+                        }
+                        // Check leveled lists ending with "Female" for an alternative.
+                        else if (lvln.EditorID.EndsWith("Female"))
+                        {
+                            formattedName = lvln.EditorID.Replace("Female", "");
+                            wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
+
+                            if (!wasModified)
+                            {
+                                formattedName = lvln.EditorID.Replace("Female", "Male");
+                                wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
+                            }
+                        }
+                        // Check leveled lists ending with "FSublist" for an alternative.
+                        else if (lvln.EditorID.EndsWith("FSublist"))
+                        {
+                            formattedName = lvln.EditorID.Replace("FSublist", "MSublist");
+                            wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
+                        }
+                        // Check leveled lists containing "Female" for an alternative.
+                        else if (lvln.EditorID.Contains("Female"))
                         {
                             formattedName = lvln.EditorID.Replace("Female", "Male");
                             wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
                         }
                     }
-                    // Check leveled lists ending with "FSublist" for an alternative.
-                    else if (lvln.EditorID.EndsWith("FSublist"))
-                    {
-                        formattedName = lvln.EditorID.Replace("FSublist", "MSublist");
-                        wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
-                    }
-                    // Check leveled lists containing "Female" for an alternative.
-                    else if (lvln.EditorID.Contains("Female"))
-                    {
-                        formattedName = lvln.EditorID.Replace("Female", "Male");
-                        wasModified = ReplaceLeveledNPCList(state, formattedName, lvln);
-                    }
-                }
 
-                if (wasModified)
-                    Console.WriteLine("Replaced leveled list " + lvln.EditorID + " with " + formattedName + ".");
+                    if (wasModified)
+                        Console.WriteLine("Replaced leveled list " + lvln.EditorID + " with " + formattedName + ".");
+                }
 
                 // Check if the npc entries are female and replace them if so.
                 if (lvln.Entries is not null)
