@@ -1,0 +1,12 @@
+{
+  "AllowMages": false,
+  "AllowDraugr": false,
+  "AllowForsworn": true,
+  "AllowVampires": true,
+  "AllowFalmer": true,
+  "ManualOverride": {
+    "LCharVigilantOfStendarrEvenTonedF": "LCharVigilantOfStendarrEvenTonedMAccented",
+    "LCharVigilantOfStendarrDarkElfF": "LCharVigilantOfStendarrNordM03",
+    "LCharVigilantOfStendarrRedguardF": "LCharVigilantOfStendarrNordM01"
+  }
+}
