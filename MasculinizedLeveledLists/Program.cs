@@ -62,7 +62,7 @@ namespace MasculinizedLeveledLists
                     {
                         // Skip entries based on settings.
                         string? editorID = lvln.EditorID.ToLower();
-                        if (configOptions.Value.AllowMages && lvln.EditorID is not null && (editorID.Contains("mage") || editorID.Contains("magic") || editorID.Contains("warlock") || editorID.Contains("witch"))) continue;
+                        if (configOptions.Value.AllowMages && lvln.EditorID is not null && (editorID.Contains("mage") || editorID.Contains("magic") || editorID.Contains("warlock") || editorID.Contains("witch") || editorID.EndsWith("fire") || editorID.EndsWith("ice") || editorID.EndsWith("atro"))) continue;
                         if (configOptions.Value.AllowDraugr && lvln.EditorID is not null && editorID.Contains("draugr")) continue;
                         if (configOptions.Value.AllowFalmer && lvln.EditorID is not null && editorID.Contains("falmer")) continue;
                         if (configOptions.Value.AllowForsworn && lvln.EditorID is not null && editorID.Contains("forsworn")) continue;
